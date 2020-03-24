@@ -1,0 +1,67 @@
+*{
+  box-sizing: content-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+$prefix: gobang;
+
+.#{$prefix}-wrap {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  .#{$prefix}-result {
+    width: 100vw;
+    height: 2vh;
+    font-size: 1vh;
+    font-weight: bold;
+    text-align: center;
+  }
+
+  .#{$prefix}-checkerboard {
+    box-shadow: 1px 1px 10px #999;
+    margin: 4vh 0;
+    position: relative;
+
+    &-style{
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    $piece-line-color: #999;
+    &-row {
+      flex: 1;
+      display: flex;
+      flex-direction: row;
+      border-top: 1px solid $piece-line-color;
+    }
+    &-row:last-child{
+      border-bottom: 1px solid $piece-line-color;
+    }
+    &-col{
+      flex: 1;
+      border-left: 1px solid $piece-line-color;
+    }
+    &-col:last-child{
+      border-right: 1px solid $piece-line-color;
+    }
+
+    &-main{
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      position: absolute;
+    }
+  }
+}
