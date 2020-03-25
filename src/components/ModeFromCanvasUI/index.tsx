@@ -12,6 +12,7 @@ const { memo, useEffect, useMemo, useState, createRef } = React;
 
 type PropsType = {
   gobangValue: Immutable.List<Immutable.List<string>>;
+  gobangDefaultValue: Immutable.List<Immutable.List<string>>;
   onClick: (
     rowValue: Immutable.List<string>,
     rowIndex: number,
@@ -22,7 +23,7 @@ type PropsType = {
 
 const ModeFromCanvas: React.FC<PropsType> = memo(
   props => {
-    const { gobangValue, onClick } = props;
+    const { gobangValue, gobangDefaultValue, onClick } = props;
 
     const CanvasRef: React.Ref<HTMLCanvasElement> = createRef();
     // 设置canvas的宽高
@@ -106,7 +107,13 @@ const ModeFromCanvas: React.FC<PropsType> = memo(
         "2d"
       ) as CanvasRenderingContext2D;
 
-      // 如果有变动 找出更新的值，并渲染
+      // 如果全部为空，则表示是重新开始 清空画布
+      if (immutable.is(gobangValue, gobangDefaultValue)) {
+        ctx.clearRect(0, 0, width, height);
+        return;
+      }
+
+      // 如果有单个变动 找出更新的值，并渲染
       const len = gobangValue.size;
       // 遍历行
       for (let rowIndex = 0; rowIndex < len; rowIndex++) {
@@ -122,7 +129,6 @@ const ModeFromCanvas: React.FC<PropsType> = memo(
             // 判断是否有不同的列，如果有，跳出循环，否则继续
             if (!immutable.is(colValue, colValueCache)) {
               // 渲染
-              console.log(1);
               renderCir(ctx, pieceSize, colIndex, rowIndex, colValue);
               break;
             }

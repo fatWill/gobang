@@ -1,8 +1,8 @@
+import React, { useMemo } from "react";
 import models, { Piece } from "../../utils/models";
 
 import ModeFromCanvasUI from "../ModeFromCanvasUI";
 import ModeFromDomUI from "../ModeFromDomUI";
-import React from "react";
 import gobangLogic from "../../utils/gobangLogic";
 
 const { memo, useEffect, useState, forwardRef, useImperativeHandle } = React;
@@ -38,11 +38,13 @@ const CheckerboardModelHOC = memo(
       setRegretGameDisabled,
       setRevocationRegretGameDisabled
     } = props;
+    const gobangDefaultValue = useMemo(
+      () => models.setGobangDefaultValue(),
+      []
+    );
     /******* 初始化state值 *******/
     // 总棋盘的值
-    const [gobangValue, setGobangValue] = useState(
-      models.setGobangDefaultValue()
-    );
+    const [gobangValue, setGobangValue] = useState(gobangDefaultValue);
 
     // 当前模式
     const [currentRenderMode, setCurrentRenderMode] = useState<RenderMode>(
@@ -184,7 +186,7 @@ const CheckerboardModelHOC = memo(
       setReStartDisabled(true);
       setRegretGameDisabled(true);
       setRevocationRegretGameDisabled(true);
-      setGobangValue(models.setGobangDefaultValue());
+      setGobangValue(gobangDefaultValue);
       setHistoryPath([]);
       setCurrentPushPointer(Piece.black);
       setCurrentHistoryPoint(0);
@@ -248,7 +250,11 @@ const CheckerboardModelHOC = memo(
           <ModeFromDomUI gobangValue={gobangValue} onClick={onClick} />
         ) : null}
         {currentRenderMode === RenderMode.canvas ? (
-          <ModeFromCanvasUI gobangValue={gobangValue} onClick={onClick} />
+          <ModeFromCanvasUI
+            gobangValue={gobangValue}
+            gobangDefaultValue={gobangDefaultValue}
+            onClick={onClick}
+          />
         ) : null}
       </>
     );
