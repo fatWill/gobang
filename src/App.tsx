@@ -20,10 +20,8 @@ const App: React.FC<{}> = memo(
 
     // 执子提示
     const [tip, setTip] = useState("请开始游戏");
-
     // 当前渲染模式的tip
     const [modeTip, setModeTip] = useState("dom渲染");
-
     // 重新开始按钮状态
     const [reStartDisabled, setReStartDisabled] = useState(true);
     // 悔棋按钮状态

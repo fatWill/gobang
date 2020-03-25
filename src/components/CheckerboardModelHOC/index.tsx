@@ -1,6 +1,5 @@
 import models, { Piece } from "../../utils/models";
 
-import { List } from "immutable";
 import ModeFromCanvasUI from "../ModeFromCanvasUI";
 import ModeFromDomUI from "../ModeFromDomUI";
 import React from "react";
@@ -39,6 +38,7 @@ const CheckerboardModelHOC = memo(
       setRegretGameDisabled,
       setRevocationRegretGameDisabled
     } = props;
+    /******* 初始化state值 *******/
     // 总棋盘的值
     const [gobangValue, setGobangValue] = useState(
       models.setGobangDefaultValue()
@@ -70,6 +70,7 @@ const CheckerboardModelHOC = memo(
       setGobangValue(newGobangValue);
     };
 
+    /******* 状态监听和游戏处理逻辑 *******/
     // 当前渲染模式提示
     useEffect(() => {
       if (currentRenderMode === RenderMode.dom) {
@@ -129,6 +130,7 @@ const CheckerboardModelHOC = memo(
       setRevocationRegretGameDisabled
     ]);
 
+    /******* 方法转发 *******/
     // 悔棋
     const regretGame = () => {
       // 防重
@@ -182,7 +184,7 @@ const CheckerboardModelHOC = memo(
       setReStartDisabled(true);
       setRegretGameDisabled(true);
       setRevocationRegretGameDisabled(true);
-      setGobangValue(List(models.setGobangDefaultValue()));
+      setGobangValue(models.setGobangDefaultValue());
       setHistoryPath([]);
       setCurrentPushPointer(Piece.black);
       setCurrentHistoryPoint(0);
@@ -207,7 +209,7 @@ const CheckerboardModelHOC = memo(
       };
     });
 
-    /** 处理点击事件逻辑 */
+    /******* 处理点击事件逻辑 *******/
     const onClick = (
       rowValue: Immutable.List<string>,
       rowIndex: number,

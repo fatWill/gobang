@@ -64,4 +64,10 @@ $prefix: gobang;
       position: absolute;
     }
   }
+
+  .#{$prefix}-opreation{
+    button{
+      margin: 0 10px;
+    }
+  }
 }

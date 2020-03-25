@@ -70,6 +70,7 @@ const ModeFromCanvas: React.FC<PropsType> = memo(
       }
     };
 
+    /** 渲染逻辑相关 */
     // 初始化渲染
     useEffect(() => {
       const ctx = CanvasRef.current?.getContext(

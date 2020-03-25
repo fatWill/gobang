@@ -7,7 +7,10 @@ export enum Piece {
   white = "*"
 }
 
-// 创建棋盘数据数据
+/**
+ * 创建棋盘数据数据
+ * @param number 可选参数 传入number生成对应值的数据
+ */
 const setGobangDefaultValue = (number?: number) => {
   const n = number ? number : CHECKER_BOARD_NUMBER;
   const result: Immutable.List<Immutable.List<string>> = immutable.List(
