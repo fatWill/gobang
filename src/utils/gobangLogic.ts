@@ -20,7 +20,7 @@ const getPieceParam = (piece: string) => {
  * @param piece 落子坐标点和棋子类型 '1-1-*'
  */
 const hasEqualPiece = (
-  gobangValue: Immutable.List<string[]>,
+  gobangValue: Immutable.List<Immutable.List<string>>,
   piece: string
 ) => {
   const gobang: string[][] = gobangValue.toJS();
@@ -40,7 +40,7 @@ const hasEqualPiece = (
  * @param piece 落子坐标点和棋子类型 '1-1-*'
  */
 const isVictory = (
-  gobangValue: Immutable.List<string[]>,
+  gobangValue: Immutable.List<Immutable.List<string>>,
   dropPiece: string
 ) => {
   // 先声明判断连珠类型

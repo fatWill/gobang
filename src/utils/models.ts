@@ -1,18 +1,19 @@
+import * as immutable from "immutable";
+
 import { CHECKER_BOARD_NUMBER } from "../config";
+
 export enum Piece {
   black = "#",
   white = "*"
 }
 
 // 创建棋盘数据数据
-const setGobangDefaultValue = (number?: Number) => {
+const setGobangDefaultValue = (number?: number) => {
   const n = number ? number : CHECKER_BOARD_NUMBER;
-  const rows: string[] = new Array<any>(n).fill("");
-  const cols = [];
-  for (let i = 0; i < n; i++) {
-    cols.push([...rows]);
-  }
-  return cols;
+  const result: Immutable.List<Immutable.List<string>> = immutable.List(
+    immutable.Repeat(immutable.List(immutable.Repeat("", n)), n)
+  );
+  return result;
 };
 
 export default {

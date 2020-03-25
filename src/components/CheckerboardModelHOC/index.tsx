@@ -1,8 +1,8 @@
-import "./index.scss";
-
 import models, { Piece } from "../../utils/models";
 
 import { List } from "immutable";
+import ModeFromCanvasUI from "../ModeFromCanvasUI";
+import ModeFromDomUI from "../ModeFromDomUI";
 import React from "react";
 import gobangLogic from "../../utils/gobangLogic";
 
@@ -10,6 +10,7 @@ const { memo, useEffect, useState, forwardRef, useImperativeHandle } = React;
 
 type PropsType = {
   setTip: React.Dispatch<React.SetStateAction<string>>;
+  setModeTip: React.Dispatch<React.SetStateAction<string>>;
   setReStartDisabled: React.Dispatch<React.SetStateAction<boolean>>;
   setRegretGameDisabled: React.Dispatch<React.SetStateAction<boolean>>;
   setRevocationRegretGameDisabled: React.Dispatch<
@@ -21,25 +22,37 @@ export type RefType = {
   restart: () => void;
   regretGame: () => void;
   revocationRegretGame: () => void;
+  triggerMode: () => void;
 };
 
-const ModeFromDom = memo(
+enum RenderMode {
+  dom,
+  canvas
+}
+
+const CheckerboardModelHOC = memo(
   forwardRef((props: PropsType, parentRef) => {
     const {
       setTip,
+      setModeTip,
       setReStartDisabled,
       setRegretGameDisabled,
       setRevocationRegretGameDisabled
     } = props;
     // 总棋盘的值
     const [gobangValue, setGobangValue] = useState(
-      List(models.setGobangDefaultValue())
+      models.setGobangDefaultValue()
+    );
+
+    // 当前模式
+    const [currentRenderMode, setCurrentRenderMode] = useState<RenderMode>(
+      RenderMode.dom
     );
 
     // 当前执子
-    const [currentPushPointer, setCurrentPushPointer] = useState<
-      Piece.black | Piece.white
-    >(Piece.black);
+    const [currentPushPointer, setCurrentPushPointer] = useState<Piece>(
+      Piece.black
+    );
 
     // 记录棋盘对局的路径
     const [historyPath, setHistoryPath] = useState<string[]>([]);
@@ -53,12 +66,21 @@ const ModeFromDom = memo(
     // 私有方法，传入row和col value，设置对应的值
     const _setGobangValue = (row: number, col: number, value: string) => {
       const rows = gobangValue.get(row);
-      const newGobangValue = gobangValue.set(
-        row,
-        rows!.fill(value, col, col + 1)
-      );
+      const newGobangValue = gobangValue.set(row, rows.set(col, value));
       setGobangValue(newGobangValue);
     };
+
+    // 当前渲染模式提示
+    useEffect(() => {
+      if (currentRenderMode === RenderMode.dom) {
+        setModeTip("dom渲染");
+        return;
+      }
+      if (currentRenderMode === RenderMode.canvas) {
+        setModeTip("canvas渲染");
+        return;
+      }
+    }, [currentRenderMode, setModeTip]);
 
     // 执子提示
     useEffect(() => {
@@ -166,68 +188,67 @@ const ModeFromDom = memo(
       setCurrentHistoryPoint(0);
     };
 
+    // 更换渲染
+    const triggerMode = () => {
+      const mode: RenderMode =
+        currentRenderMode === RenderMode.dom
+          ? RenderMode.canvas
+          : RenderMode.dom;
+      setCurrentRenderMode(mode);
+    };
+
     // 向父组件传递对应的方法
     useImperativeHandle(parentRef, () => {
       return {
         regretGame,
         revocationRegretGame,
-        restart
+        restart,
+        triggerMode
       };
     });
 
+    /** 处理点击事件逻辑 */
+    const onClick = (
+      rowValue: Immutable.List<string>,
+      rowIndex: number,
+      colValue: string,
+      colIndex: number
+    ) => {
+      // 如果已经置棋了或者游戏结束了则直接return
+      if (
+        isGameOver ||
+        colValue.includes(Piece.black) ||
+        colValue.includes(Piece.white)
+      )
+        return;
+
+      // 设置新的棋盘渲染
+      _setGobangValue(rowIndex, colIndex, currentPushPointer);
+
+      // 设置当前记录指针指向
+      setCurrentHistoryPoint(currentHistoryPoint + 1);
+
+      // 设置棋盘对局的路径
+      setHistoryPath([
+        ...historyPath.slice(0, currentHistoryPoint),
+        `${rowIndex}-${colIndex}-${currentPushPointer}`
+      ]);
+
+      // 换子执行
+      setCurrentPushPointer(
+        currentPushPointer === Piece.black ? Piece.white : Piece.black
+      );
+    };
+
     return (
-      <div className="checkerboard-wrap">
-        {gobangValue.map((rowValue, rowIndex) => {
-          return (
-            <div key={`row-${rowIndex}`} className="checkerboard-row">
-              {rowValue!.map((colValue, colIndex) => {
-                return (
-                  <div
-                    key={`col-${colIndex}`}
-                    className="checkerboard-col"
-                    onClick={() => {
-                      // 如果已经置棋了或者游戏结束了则直接return
-                      if (
-                        isGameOver ||
-                        colValue.includes(Piece.black) ||
-                        colValue.includes(Piece.white)
-                      )
-                        return;
-
-                      // 设置新的棋盘渲染
-                      _setGobangValue(rowIndex!, colIndex, currentPushPointer);
-
-                      // 设置当前记录指针指向
-                      setCurrentHistoryPoint(currentHistoryPoint + 1);
-
-                      // 设置棋盘对局的路径
-                      setHistoryPath([
-                        ...historyPath.slice(0, currentHistoryPoint),
-                        `${rowIndex}-${colIndex}-${currentPushPointer}`
-                      ]);
-
-                      // 换子执行
-                      setCurrentPushPointer(
-                        currentPushPointer === Piece.black
-                          ? Piece.white
-                          : Piece.black
-                      );
-                    }}
-                  >
-                    <div
-                      className={`${
-                        colValue === Piece.black ? "checkerboard-col-black" : ""
-                      } ${
-                        colValue === Piece.white ? "checkerboard-col-white" : ""
-                      }`}
-                    />
-                  </div>
-                );
-              })}
-            </div>
-          );
-        })}
-      </div>
+      <>
+        {currentRenderMode === RenderMode.dom ? (
+          <ModeFromDomUI gobangValue={gobangValue} onClick={onClick} />
+        ) : null}
+        {currentRenderMode === RenderMode.canvas ? (
+          <ModeFromCanvasUI gobangValue={gobangValue} onClick={onClick} />
+        ) : null}
+      </>
     );
   }),
   (prevProps, nextProps) => {
@@ -235,4 +256,4 @@ const ModeFromDom = memo(
   }
 );
 
-export default ModeFromDom;
+export default CheckerboardModelHOC;
